@@ -1,0 +1,155 @@
+```{python}
+#| label: libraries
+#| include: false
+import pandas as pd
+import numpy as np
+from lets_plot import *
+
+LetsPlot.setup_html()
+```
+
+```{python}
+
+df = pd.read_csv(r"C:\Users\ERAPS\Desktop\KCA\2024\CLUB\KCA\Retail Transactions.csv")
+
+df.head(100)
+```
+
+## Task 1: Data Cleaning
+
+__Clean and prepare the data for analysis, handling missing values and creating any necessary calculated columns.__
+
+```{python}
+# Change all null values in num_of_items,discount_amt and order_amt to 0
+df['num_of_items'] = df['num_of_items'].fillna(0)
+df['discount_amt'] = df['discount_amt'].fillna(0)
+df['order_amt'] = df['order_amt'].fillna(0)
+
+df.head(100)
+
+```
+
+```{python}
+# Check for missing values  
+df.isnull().sum()
+```
+
+```{python}
+# Check for duplicates
+df.duplicated().sum()
+```
+
+```{python}
+# Change null values in rewards_number and rewards_member to Flase, and coupon_flag to No
+df['rewards_number'] = df['rewards_number'].fillna(False)
+df['rewards_member'] = df['rewards_member'].fillna(False)
+df['coupon_flag'] = df['coupon_flag'].fillna('No')
+
+df.head(100)
+```
+
+```{python}
+# Remove the dollar signs and convert 'order_amt' to float
+df['order_amt'] = df['order_amt'].str.replace('$', '').astype(float)
+
+df.head(100)
+```
+## Task 2: Data Analysis
+
+
+__Develop visualizations that answer the following business questions.__
+- A. Are sales higher on specific days or in particular states or cities?
+
+```{python}
+# Group by state and sum the order amounts 
+state_order_sums = df.groupby('location_state')['order_amt'].sum().reset_index() 
+
+# Sort the states by the total order amount in descending order 
+sorted_states = state_order_sums.sort_values(by='order_amt', ascending=False) 
+
+# Print the sorted results 
+print(sorted_states)
+```
+
+```{python}
+# Plot a graph on the total order amount by state
+ggplot(data=state_order_sums) \
+    + geom_bar(aes(x='location_state', y='order_amt'), stat='identity', fill='blue') \
+    + ggsize(800, 500) \
+    + ggtitle('Total Order Amount by State') \
+    + labs(x='State', y='Total Order Amount') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+
+```
+
+```{python}
+# Group by city and sum the order amounts
+city_order_sums = df.groupby('location_city')['order_amt'].sum().reset_index()
+print(city_order_sums)
+```
+
+```{python}
+# Sort the cities by the total order amount in descending order and create a line plot
+sorted_cities = city_order_sums.sort_values(by='order_amt', ascending=False)
+ggplot(data=sorted_cities) \
+    + geom_line(aes(x='location_city', y='order_amt'), color='blue') \
+    + ggsize(800, 500) \
+    + ggtitle('Total Order Amount by City') \
+    + labs(x='City', y='Total Order Amount') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+```
+
+```{python}
+# Which city has the highest total order amount?
+max_order_city = sorted_cities.iloc[0]['location_city']
+max_order_amt = sorted_cities.iloc[0]['order_amt']
+print(f"The city with the highest total order amount is {max_order_city} with an amount of ${max_order_amt}")
+```
+
+```{python}
+# Which day of the week has the highest total order amount within each state?
+# Convert transaction_date to datetime and extract day name
+df['transaction_date'] = pd.to_datetime(df['transaction_date'])
+df['day_of_week'] = df['transaction_date'].dt.day_name()
+
+# Calculate the total order amount by state and day of the week
+state_day_order_sums = df.groupby(['location_state', 'day_of_week'])['order_amt'].sum().reset_index()
+
+# Find the day of the week with the highest total order amount in each state
+state_max_day_order = state_day_order_sums.loc[state_day_order_sums.groupby('location_state')['order_amt'].idxmax()].reset_index(drop=True)
+
+print(state_max_day_order)
+
+
+```
+
+```{python}
+#  How does the use of discounts and coupons affect total sales in each location?
+# Calculate the total order amount with and without discounts and coupons
+
+
+# Convert 'order_amt' and 'discount_amt' to numerical values if they aren't already
+df['order_amt'] = df['order_amt'].replace('[\$,]', '', regex=True).astype(float)
+df['discount_amt'] = df['discount_amt'].replace('[\$,]', '', regex=True).astype(float)
+
+# Separate total sales with and without coupons for each location
+discount_summary = df.groupby(['location_state', 'location_city', 'coupon_flag']).agg(
+    total_sales=('order_amt', 'sum'),
+    total_discounts=('discount_amt', 'sum'),
+    avg_order_amt=('order_amt', 'mean'),
+    num_transactions=('order_amt', 'count')
+).reset_index()
+
+# Split into two DataFrames for clarity in comparison
+coupon_usage = discount_summary[discount_summary['coupon_flag'] == 'Yes']
+
+no_coupon_usage = discount_summary[discount_summary['coupon_flag'] == 'No']
+
+# Print summaries for each location, limit to 5 rows for brevity
+print("\nWith Coupon Usage Summary by Location:")
+print(coupon_usage.head())
+
+print("\nWithout Coupon Usage Summary by Location:")
+print(no_coupon_usage.head())
+
+```
