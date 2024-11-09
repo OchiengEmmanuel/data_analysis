@@ -83,9 +83,12 @@ ggplot(data=state_order_sums) \
 ```
 
 ```{python}
-# Group by city and sum the order amounts
-city_order_sums = df.groupby('location_city')['order_amt'].sum().reset_index()
+# Group by city and sum the order amounts, then sort the cities by the total order amount in descending order
+city_order_sums = df.groupby('location_city')['order_amt'].sum().reset_index().sort_values(by='order_amt', ascending=False)
+
+# Print the sorted results
 print(city_order_sums)
+
 ```
 
 ```{python}
@@ -153,3 +156,49 @@ print("\nWithout Coupon Usage Summary by Location:")
 print(no_coupon_usage.head())
 
 ```
+
+```{python}
+# count how many cities are in the dataset
+num_cities = df['location_city'].nunique()
+print(f'The number of unique cities in the dataset is: {num_cities}')
+```
+
+```{python}
+# Which state has how many cities?
+state_city_counts = df.groupby('location_state')['location_city'].nunique().reset_index()
+print(state_city_counts)
+
+# Graph the number of cities per state
+ggplot(data=state_city_counts) \
+    + geom_bar(aes(x='location_state', y='location_city'), stat='identity', fill='yellow') \
+    + ggsize(800, 500) \
+    + ggtitle('Number of Cities per State') \
+    + labs(x='State', y='Number of Cities') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+
+```
+
+```{python}
+# Now find the average order amount for each state
+state_avg_order_amt = df.groupby('location_state')['order_amt'].mean().reset_index()
+print(state_avg_order_amt)
+
+# Graph the average order amount per state
+ggplot(data=state_avg_order_amt) \
+    + geom_bar(aes(x='location_state', y='order_amt'), stat='identity', fill='red') \
+    + ggsize(800, 500) \
+    + ggtitle('Average Order Amount by State') \
+    + labs(x='State', y='Average Order Amount') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+```
+
+```{python}
+# Distribution of the order amount by state
+ggplot(data=df) \
+    + geom_boxplot(aes(x='location_state', y='order_amt'), fill='green') \
+    + ggsize(800, 500) \
+    + ggtitle('Distribution of Order Amount by State') \
+    + labs(x='State', y='Order Amount') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+```
+
