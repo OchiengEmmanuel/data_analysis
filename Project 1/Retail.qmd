@@ -202,3 +202,133 @@ ggplot(data=df) \
     + theme(axis_text_x=element_text(angle=45, hjust=1))
 ```
 
+## Task 3:  
+
+__Do rewards members tend to spend more per transaction compared to non-members?__
+
+```{python}
+#  Do rewards members tend to spend more per transaction compared to non-members?
+
+# Group by 'rewards_member' and calculate the average order amount for each group
+rewards_summary = df.groupby('rewards_member').agg(
+    avg_order_amt=('order_amt', 'mean'),
+    num_transactions=('order_amt', 'count')
+).reset_index()
+
+# Print the summary for rewards members and non-members
+print(rewards_summary)
+```
+- The data shows no significant difference in the average order amount between rewards members and non-members. In fact members with no rewards made more transactions than members with rewards.
+
+
+## Task 4:
+
+__Is there a correlation between the number of items purchased and the rewards membership status?__
+
+```{python}
+# correlation between the number of items purchased and the rewards membership status?
+
+correlation = df['num_of_items'].corr(df['rewards_member'])
+print(correlation)
+
+# Graph the correlation between the number of items purchased and rewards membership status
+ggplot(data=df) \
+    + geom_point(aes(x='num_of_items', y='rewards_member'), color='green') \
+    + ggsize(800, 500) \
+    + ggtitle('Correlation between Number of Items Purchased and Rewards Membership Status') \
+    + labs(x='Number of Items', y='Rewards Member') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+
+
+```
+- The data shows no significant correlation between the number of items purchased and rewards membership status.
+
+## Task 5:
+
+__Are transactions with discounts or coupons associated with higher quantities of items purchased?__
+
+```{python}
+# Are transactions with discounts or coupons associated with higher quantities of items purchased?
+
+# Group by 'coupon_flag' to see if transactions with coupons have higher quantities of items purchased
+# Group by 'discount_amt' to see if transactions with discounts have higher quantities of items purchased
+
+# Calculate the average and the distribution of the number of items purchased for transactions with and without coupons or discounts
+coupon_summary = df.groupby('coupon_flag').agg(
+    avg_num_items=('num_of_items', 'mean'),
+    num_items_std=('num_of_items', 'std')
+).reset_index()
+
+discount_summary = df.groupby('discount_amt').agg(
+    avg_num_items=('num_of_items', 'mean'),
+    num_items_std=('num_of_items', 'std')
+).reset_index()
+
+# Print the summaries
+print("\nCoupon Summary:")
+print(coupon_summary)
+
+print("\nDiscount Summary:")
+print(discount_summary)
+
+
+# Graph the average number of items purchased for transactions with and without coupons
+ggplot(data=coupon_summary) \
+    + geom_bar(aes(x='coupon_flag', y='avg_num_items'), stat='identity', fill='red') \
+    + ggsize(800, 500) \
+    + ggtitle('Average Number of Items Purchased by Coupon Usage') \
+    + labs(x='Coupon Usage', y='Average Number of Items Purchased') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+
+```
+
+ - There is no significant difference in the average number of items purchased between transactions with and without coupons from the data. Therefore, the sales team should consider other factors when deciding whether to offer coupons.
+
+## Task 6:
+
+__Which days show the highest sales, and do they align with any promotional discounts or coupon use?__
+
+```{python}
+# Which days show the highest sales, and do they align with any promotional discounts or coupon use?
+
+# Define the custom order for days of the week
+day_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+# Convert 'day_of_week' to a categorical type with a custom order
+df['day_of_week'] = pd.Categorical(df['day_of_week'], categories=day_order, ordered=True)
+
+# Plot coupon usage by day of the week, order amount by day of the week, from Monday to Sunday
+
+print("\nCoupon Usage by Day of the Week:")
+ggplot(data=df) \
+    + geom_bar(aes(x='day_of_week', fill='coupon_flag'), position='dodge') \
+    + ggsize(800, 500) \
+    + ggtitle('Coupon Usage by Day of the Week') \
+    + labs(x='Day of the Week', y='Number of Transactions', fill='Coupon Usage') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+
+```
+
+```{python}
+# Plot discount usage by day of the week, order amount by day of the week, from Monday to Sunday
+print("\nDiscount Usage by Day of the Week:")
+ggplot(data=df) \
+    + geom_bar(aes(x='day_of_week', fill='discount_amt'), position='dodge') \
+    + ggsize(800, 500) \
+    + ggtitle('Discount Usage by Day of the Week') \
+    + labs(x='Day of the Week', y='Number of Transactions', fill='Discount Usage') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+```
+
+```{python}
+# Plot graph of total sales by day of the week
+day_order_sums = df.groupby('day_of_week')['order_amt'].sum().reset_index()
+sorted_days = day_order_sums.sort_values(by='order_amt', ascending=False)
+
+ggplot(data=sorted_days) \
+    + geom_line(aes(x='day_of_week', y='order_amt'), color='blue') \
+    + ggsize(800, 500) \
+    + ggtitle('Total Order Amount by Day of the Week') \
+    + labs(x='Day of the Week', y='Total Order Amount') \
+    + theme(axis_text_x=element_text(angle=45, hjust=1))
+```
