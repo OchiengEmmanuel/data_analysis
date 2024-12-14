@@ -1,0 +1,69 @@
+## W12 Overview: Case Study 7
+- The Bill and Melinda Gates Foundation wants to eradicate tuberculosisLinks to an external site. (TB). They have asked your team to use the World Health Organization’s report on TB to guide them on their next steps in fighting this disease.
+
+- Your presentation should address the following questions:
+
+    Which countries require our attention?
+    What age groups are of the most concern?
+    Are there differences between males and females?
+    What data science programming language should we use moving forward?
+
+```{python} 
+
+# Importing the necessary libraries
+import pandas as pd
+import numpy as np
+from lets_plot import *
+
+LetsPlot.setup_html()
+
+```
+
+```{python}
+
+# Reading in the data
+url = ("C:/Users/ERAPS/Desktop/BYU/Fall 2024/DS 150 Data Intuition and Insight/WK 13/clean_tb_extra_v.csv")
+
+```
+```{python}
+df = pd.read_csv(url, encoding='ISO-8859-1')
+```
+
+```{python}
+df.head(20)
+```
+
+```{python}
+# Show pop_estimate where country is not null
+
+df = df[df['pop_estimate'].notnull()]
+df.head(20)
+```
+
+```{python}
+# Show using a chart, Trend Analysis: Deaths and Cases Over Time, drop rows with missing values.
+
+df = df.dropna(subset=['year', 'new_cases'])
+df.head(20)
+```
+
+```{python}
+# Show using a chart, Trend Analysis: Cases Over Time, drop rows with missing values.
+
+# Chart showing trend
+
+
+chart = (
+    ggplot(df, aes(x='year', y='new_cases')) +
+    geom_bar(color='blue', size=1.2) +
+    ggtitle('Trend Analysis: Cases Over Time') +
+    xlab('Year') +
+    ylab('Number of Cases') +
+    scale_x_continuous(format='d')  )
+
+chart
+
+```
+
+
+
