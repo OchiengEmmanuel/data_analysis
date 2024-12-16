@@ -1,0 +1,14 @@
+# Importing tables from Web
+
+- It is always possible to importtables from the web using read_html(). It will read the entire webpage.
+
+```{Python}
+
+import pandas as pd
+
+url = "https://en.wikipedia.org/wiki/twitter"
+
+df = read.html(url)
+
+df
+```

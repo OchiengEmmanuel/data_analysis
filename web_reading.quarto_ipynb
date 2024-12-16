@@ -1,0 +1,36 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Importing tables from Web\n",
+        "\n",
+        "- It is always possible to importtables from the web using read_html(). It will read the entire webpage.\n",
+        "\n",
+        "\n",
+        "```{Python}\n",
+        "\n",
+        "import pandas as pd\n",
+        "\n",
+        "url = \"https://en.wikipedia.org/wiki/twitter\"\n",
+        "\n",
+        "df = read.html(url)\n",
+        "\n",
+        "df\n",
+        "```"
+      ],
+      "id": "51c25ce6"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "C:\\Users\\ERAPS\\AppData\\Roaming\\Python\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

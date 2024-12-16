@@ -1,0 +1,217 @@
+## Importing tables from the web
+- In thi snippet, we will import tables from the web and perform some analysis on the data. In order to do this, we will use the `pandas` library to read the tables from a given URL. We use the URL of the NBA 2018 per game statistics page as an example. The pandas `read_html` function is used to read the tables from the URL, and we display the number of tables read.
+
+```{python}
+# Import libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+```
+
+```{python}
+# NBA
+
+url = "https://www.basketball-reference.com/leagues/NBA_2018_per_game.html"
+tables = pd.read_html(url)
+```
+
+
+## Understanding the structure of the data.
+
+- The data contains multiple tables, and we can access each table by its index. We can display the column names of the first table to understand the structure of the data. But how do we know how many tables are there in the data? We can use the `len` function to find out the number of tables in the data.
+
+```{python}
+# Number of tables
+len(tables)
+```
+- Now that we know the number of tables in the data, we can access each table by its index. Let's display the column names of the first table to understand the structure of the data.
+
+```{python}
+# The column names of the first table
+tables[0].columns
+```
+
+## Let the fun begin
+- Now that we have an understanding of the structure of the data, we can start analyzing the data. We can perform various operations such as filtering, sorting, and visualization to gain insights from the data. Let's start by displaying the data from the first table.
+
+- In the data, we have information about the players in the NBA, including their age, team, points per game, and awards. We can filter the data based on different criteria to find interesting patterns and insights.
+
+- As the start, who is the oldest player in the NBA?
+
+```{python}
+# Oldest players in the NBA
+players = tables[0][["Rk", "Player", "Age", "Team"]]
+players[players["Age"] == players["Age"].max()]
+```
+- Now we know that Vince Carter is the oldest player in the NBA, and which team he plays for. Let's find out who the youngest player is.
+
+```{python}
+# Youngest players in the NBA
+players =  tables[0][["Rk", "Player", "Age", "Team"]]
+players[players["Age"] == players["Age"].min()]
+```
+- Here, we find that there are multiple players with the same age, and we can sort them by points to see who has scored the most points, or even find out which positions and teams they play for. But we are not going to do that.
+
+- Remember in the oldest player, we only got one player, but in the youngest player, we got multiple players. We can go deeper to find out the top 10 oldest players in the NBA, and the points they have scored in all games, plus their teams.
+
+```{python}
+# Top 10 oldest players in the NBA ranked by points in all games
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS"]]
+players = players.sort_values(by=["Age"], ascending=[False]).head(10)
+players
+```
+- But wait, how many players are there in the NBA? Let's find out.
+```{python}
+# Count number of players in NBA.
+players = tables[0]
+print(f"Number of players in the NBA: {len(players)}")
+```
+- Now that we know the number of players in the NBA, we can find out the top 10 youngest players in the NBA, ranked by points in all games. Does it mean without this we couldn't have known the number of youngest players in the NBA? No, we could have known, but we are adding some fun.
+
+- In this analysis, we will find out who are the top 10 youngest players in the NBA, ranked by points in all games.
+
+```{python}
+# top 10 youngest players in the NBA ranked by points in all games
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS"]]
+players[players["Age"] == players["Age"].min()].sort_values(by="PTS", ascending=False).head(10)
+```
+- We can also detemine which players have won awards. Let's find out who they are. We will filter the data to show only players who have won awards.
+
+```{python}
+# Only players with awards
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players[players["Awards"].notnull()]
+```
+- We see that a number of players have won different awards. We can count the number of each awards. Let's do that!
+
+```{python}
+# Count of awards
+awards = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+awards["Awards"].value_counts().head(10)
+```
+- We find out that the AS award is the most common award among the players. We can filter the data to show only players who have won the certain awards such as AS award and the 6MOY-12 award.
+
+```{python}
+# Players with AS and  6MOY-12 awards
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players = players[players["Awards"].str.contains("AS|6MOY-12", regex=True, na=False)]
+
+print(players)
+```
+
+- On awards, can we find out which players are top ranked and with awards, and which players are top ranked without awards? Let's find out!
+
+```{python}
+# Top ranked players with awards
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players = players[players["Awards"].notnull()]
+players = players.sort_values(by=["PTS"], ascending=[False]).head(10)
+players
+```
+
+```{python}
+# Top ranked players without awards
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players = players[players["Awards"].isnull()]
+players = players.sort_values(by=["PTS"], ascending=[False]).head(10)
+players
+```
+
+- We can even go further to detemine the players with the highest number of awards. Let's find out who they are. But wait, going straight to coding brings some errors. Seems like it is not that simple!
+
+- The best thing to do is to display the awards column to understand the structure of the data. This will help us in filtering the data to find the players with the highest number of awards.
+
+```{python}
+# Display the awards column
+tables[0]["Awards"]
+```
+
+- Aha, we can see that the awards column contains multiple awards separated by commas. We can create a new column to count the number of awards for each player. We will name it "Awards count."  Let's do that!
+
+```{python}
+# The number of wards for each player
+players_awards = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]].copy()
+# Replace NaN in the Awards column with an empty string
+players_awards["Awards"] = players_awards["Awards"].fillna("")
+
+players_awards["Awards count"] = players_awards["Awards"].apply(
+    lambda x: 0 if x == "" else x.count(",") + 1)
+players_awards
+```
+
+
+## Bonus Analysis
+
+```{python}
+# Top ranked players
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players = players.sort_values(by=["PTS"], ascending=[False]).head(10)
+players
+```
+
+- Let's figure out the lowest 10 ranked players in the NBA. We can sort the data by the age in a descending order to find out.
+```{python}
+# Lowest 10 ranked players 
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players = players.sort_values(by=["Age"], ascending=[False]).head(10)
+players
+```
+
+- Can a player be the lowest ranked and still have awards? Let's find out!
+
+```{python}
+# Lowest ranked players with awards
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players = players[players["Awards"].notnull()]
+players = players.sort_values(by=["PTS"], ascending=[True]).head(10)
+players
+```
+
+```{python}
+# Lowest ranked players without awards
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+players = players[players["Awards"].isnull()]
+players = players.sort_values(by=["PTS"], ascending=[True]).head(10)
+players
+```
+- We can also explore the relationship between age and points scored by the players. We can create a scatter plot to visualize this relationship.
+
+```{python}
+# Raltionship between age and points
+players = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]]
+
+plt.figure(facecolor="red")
+players.plot.scatter(x="Age", y="PTS", title="Relationship between Age and Points")
+plt.show()
+```
+
+```{python}
+# Creating age groups, and finding the average points for each group, and plotting the results
+players_age_grp = tables[0][["Rk", "Player", "Age", "Team", "PTS", "Awards"]].copy()
+players_age_grp["Age group"] = pd.cut(
+    players_age_grp["Age"], 
+    bins=[15, 20, 25, 30, 35, 40, 45], 
+    labels=["15-20", "21-25", "26-30", "31-35", "36-40", "41-45"],
+    include_lowest=True
+    )
+# Group by age group and calculate average points
+avg_points_by_age = players_age_grp.groupby("Age group", observed=False)["PTS"].mean()
+
+# Plot the results
+plt.figure(facecolor="grey")
+avg_points_by_age.plot(kind="bar", title="Average Points by Age Group", color="blue")
+plt.xlabel("Age Group")
+plt.ylabel("Average Points")
+plt.tight_layout()
+plt.show()
+```
+
+- Also, who are the top 10 players with the most awards? We can sort the data by the "Awards count" column in descending order to find out.
+
+```{python}
+# Top 10 players with the most awards
+players_awards.sort_values(by="Awards count", ascending=False).head(10)
+```
+
+## Summary
+
+-  We have successfully imported tables from the web and performed some analysis on the data. We have explored the data to find out the oldest and youngest players in the NBA, the top 10 oldest and youngest players ranked by points, players with awards, the number of awards for each player, and the relationship between age and points scored by the players. We have also created visualizations to better understand the data. We have also found out the top 10 players with the most awards. This analysis provides valuable insights into the NBA player statistics and can be used for further analysis and decision-making.
