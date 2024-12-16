@@ -215,3 +215,5 @@ players_awards.sort_values(by="Awards count", ascending=False).head(10)
 ## Summary
 
 -  We have successfully imported tables from the web and performed some analysis on the data. We have explored the data to find out the oldest and youngest players in the NBA, the top 10 oldest and youngest players ranked by points, players with awards, the number of awards for each player, and the relationship between age and points scored by the players. We have also created visualizations to better understand the data. We have also found out the top 10 players with the most awards. This analysis provides valuable insights into the NBA player statistics and can be used for further analysis and decision-making.
+
+
