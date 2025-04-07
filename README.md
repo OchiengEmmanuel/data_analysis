@@ -1,2 +1,2 @@
-# data_analysis
-business data analaysis
+# NBA Web data_analysis
+- The objective of this project is to import tables from the web, perform analysis on the data, and gain insights into the NBA player statistics. We will use the pandas library to read the tables from a given URL and analyze the data to find interesting patterns and insights. We will explore the data to find out the oldest and youngest players in the NBA, the top 10 oldest and youngest players ranked by points, players with awards, the number of awards for each player, and the relationship between age and points scored by the players. We will also create visualizations to better understand the data and find out the top 10 players with the most awards. This analysis will provide valuable insights into the NBA player statistics and can be used for further analysis and decision-making.
